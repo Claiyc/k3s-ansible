@@ -1,0 +1,34 @@
+---
+- name: Copy keepalived RPMs to node
+  copy:
+    src: "{{ item }}"
+    dest: "/tmp/{{ item }}"
+    mode: "0644"
+  loop: "{{ keepalived_rpms }}"
+
+- name: Install keepalived and dependencies from local RPMs
+  yum:
+    name: "/tmp/{{ item }}"
+    state: present
+  loop: "{{ keepalived_rpms }}"
+
+- name: Ensure keepalived config directory exists
+  file:
+    path: /etc/keepalived
+    state: directory
+    mode: "0755"
+
+- name: Deploy keepalived configuration
+  template:
+    src: keepalived.conf.j2
+    dest: /etc/keepalived/keepalived.conf
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart keepalived
+
+- name: Enable and start keepalived
+  systemd:
+    name: keepalived
+    enabled: true
+    state: started

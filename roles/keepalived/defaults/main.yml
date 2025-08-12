@@ -1,0 +1,25 @@
+# Network interface used for VRRP
+keepalived_interface: eth0
+
+# VRRP Router ID (must match across cluster, but be unique to the VIP)
+keepalived_vrid: 51
+
+# Virtual IP address (K3s API endpoint in HA setup)
+keepalived_vip: 192.168.1.100/24
+
+# Auth password (must match on all participants)
+keepalived_auth_pass: "changeme"
+
+# Node priority (higher = master)
+keepalived_priority: "{{ 150 if inventory_hostname == groups['k3s_servers'][0] else 100 }}"
+
+# State (MASTER or BACKUP)
+keepalived_state: "{{ 'MASTER' if inventory_hostname == groups['k3s_servers'][0] else 'BACKUP' }}"
+
+# Local RPM files for offline install (must be present in files/)
+keepalived_rpms:
+  - lm_sensors-libs-3.4.0-23.20180522git70f7e08.el8.x86_64.rpm
+  - mariadb-connector-c-3.1.11-2.el8_3.x86_64.rpm
+  - mariadb-connector-c-config-3.1.11-2.el8_3.noarch.rpm
+  - net-snmp-agent-libs-5.8-25.el8_7.1.x86_64.rpm
+  - keepalived-2.1.5-9.el8.x86_64.rpm
